@@ -1,0 +1,17 @@
+# This file is used by pip to install required python packages
+# Usage: pip install -r requirements.txt
+
+# UI
+pyqt5
+
+# Loads environment variables
+dotenv
+
+# LLM Interface
+openai
+
+# Downloads transcripts
+youtube-transcript-api
+
+# Formats the markdown output to html
+markdown2
