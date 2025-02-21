@@ -98,6 +98,9 @@ class TranscriptApp(QMainWindow):
         return None
 
     def fetch_transcript(self):
+        self.transcript_display.setText("Fetching transcript...")
+        self.transcript_display.repaint()
+        QCoreApplication.processEvents()  # Process pending events
         url = self.url_input.text()
         video_id = self.extract_video_id(url)
         
