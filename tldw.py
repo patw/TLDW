@@ -109,7 +109,7 @@ class TranscriptApp(QMainWindow):
             return
 
         try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
             # Extract just the text from the transcript
             text_only = ' '.join([entry['text'] for entry in transcript])
             self.transcript_display.setText("Thinking...")
