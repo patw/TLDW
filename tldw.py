@@ -1,5 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLineEdit, QPushButton, QTextEdit
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                            QLineEdit, QPushButton, QTextEdit, QTabWidget)
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -81,12 +82,25 @@ class TranscriptApp(QMainWindow):
         self.fetch_button.clicked.connect(self.fetch_transcript)
         layout.addWidget(self.fetch_button)
 
-        # The transcript_display can accept HTML
-        self.transcript_display = QTextEdit()
-        self.transcript_display.setFont(default_font)
-        self.transcript_display.setReadOnly(True)
-        self.transcript_display.setAcceptRichText(True)  # Enable rich text
-        layout.addWidget(self.transcript_display)
+        # Create tab widget for formatted and raw views
+        self.tab_widget = QTabWidget()
+        
+        # Formatted HTML tab
+        self.formatted_display = QTextEdit()
+        self.formatted_display.setFont(default_font)
+        self.formatted_display.setReadOnly(True)
+        self.formatted_display.setAcceptRichText(True)
+        
+        # Raw markdown tab
+        self.raw_display = QTextEdit()
+        self.raw_display.setFont(default_font)
+        self.raw_display.setReadOnly(True)
+        
+        # Add tabs
+        self.tab_widget.addTab(self.formatted_display, "Formatted")
+        self.tab_widget.addTab(self.raw_display, "Raw Markdown")
+        
+        layout.addWidget(self.tab_widget)
 
         self.llm_thread = None # Initialize the LLM thread
 
@@ -98,8 +112,9 @@ class TranscriptApp(QMainWindow):
         return None
 
     def fetch_transcript(self):
-        self.transcript_display.setText("Fetching transcript...")
-        self.transcript_display.repaint()
+        self.formatted_display.setText("Fetching transcript...")
+        self.raw_display.setText("")
+        self.formatted_display.repaint()
         QCoreApplication.processEvents()  # Process pending events
         url = self.url_input.text()
         video_id = self.extract_video_id(url)
@@ -112,8 +127,9 @@ class TranscriptApp(QMainWindow):
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
             # Extract just the text from the transcript
             text_only = ' '.join([entry['text'] for entry in transcript])
-            self.transcript_display.setText("Thinking...")
-            self.transcript_display.repaint()
+            self.formatted_display.setText("Thinking...")
+            self.raw_display.setText("")
+            self.formatted_display.repaint()
             QCoreApplication.processEvents()  # Process pending events
             prompt = SUMMARY_PROMPT.format(transcript=text_only)
 
@@ -128,20 +144,23 @@ class TranscriptApp(QMainWindow):
             self.transcript_display.setText(f"Error fetching transcript: {str(e)}")
 
     def update_summary(self, video_summary):
-         """
-         Updates the transcript display with the summary from the LLM.
-         This method is called when the LLM thread finishes successfully.
-         """
-         html_content = markdown2.markdown(video_summary)
-         self.transcript_display.setText(html_content)
-         self.llm_thread = None  # Reset the thread
+        """
+        Updates both tabs with the summary from the LLM.
+        This method is called when the LLM thread finishes successfully.
+        """
+        html_content = markdown2.markdown(video_summary)
+        self.formatted_display.setText(html_content)
+        self.raw_display.setText(video_summary)
+        self.llm_thread = None  # Reset the thread
 
     def show_error(self, message):
         """
-        Displays an error message in the transcript display.
+        Displays an error message in both tabs.
         This method is called when the LLM thread encounters an error.
         """
-        self.transcript_display.setText(f"Error generating summary: {message}")
+        error_msg = f"Error generating summary: {message}"
+        self.formatted_display.setText(error_msg)
+        self.raw_display.setText(error_msg)
         self.llm_thread = None  # Reset the thread
 
 
