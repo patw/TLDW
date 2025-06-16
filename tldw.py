@@ -164,6 +164,24 @@ class TranscriptApp(QMainWindow):
         self.raw_display.setText(video_summary)
         self.llm_thread = None  # Reset the thread
 
+    def show_config_dialog(self):
+        dialog = ConfigDialog(self)
+        if dialog.exec_() == QDialog.Accepted:
+            values = dialog.get_values()
+            settings.setValue("llm_base_url", values["llm_base_url"])
+            settings.setValue("api_key", values["api_key"])
+            settings.setValue("model_name", values["model_name"])
+            settings.setValue("system_message", values["system_message"])
+            settings.setValue("summary_prompt", values["summary_prompt"])
+            
+            # Update global variables
+            global LLM_BASE_URL, API_KEY, MODEL_NAME, SYSTEM_MESSAGE, SUMMARY_PROMPT
+            LLM_BASE_URL = values["llm_base_url"]
+            API_KEY = values["api_key"]
+            MODEL_NAME = values["model_name"]
+            SYSTEM_MESSAGE = values["system_message"]
+            SUMMARY_PROMPT = values["summary_prompt"]
+
 class ConfigDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -197,24 +215,6 @@ class ConfigDialog(QDialog):
             "system_message": self.system_message.toPlainText(),
             "summary_prompt": self.summary_prompt.toPlainText()
         }
-
-    def show_config_dialog(self):
-        dialog = ConfigDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
-            values = dialog.get_values()
-            settings.setValue("llm_base_url", values["llm_base_url"])
-            settings.setValue("api_key", values["api_key"])
-            settings.setValue("model_name", values["model_name"])
-            settings.setValue("system_message", values["system_message"])
-            settings.setValue("summary_prompt", values["summary_prompt"])
-            
-            # Update global variables
-            global LLM_BASE_URL, API_KEY, MODEL_NAME, SYSTEM_MESSAGE, SUMMARY_PROMPT
-            LLM_BASE_URL = values["llm_base_url"]
-            API_KEY = values["api_key"]
-            MODEL_NAME = values["model_name"]
-            SYSTEM_MESSAGE = values["system_message"]
-            SUMMARY_PROMPT = values["summary_prompt"]
 
     def show_error(self, message):
         """
