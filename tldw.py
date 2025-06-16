@@ -1,8 +1,9 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                            QLineEdit, QPushButton, QTextEdit, QTabWidget)
+                            QLineEdit, QPushButton, QTextEdit, QTabWidget,
+                            QDialog, QFormLayout, QDialogButtonBox)
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal
+from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal, QSettings
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
 import os 
@@ -17,11 +18,15 @@ from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
 
-LLM_BASE_URL = os.getenv("LLM_BASE_URL")
-API_KEY = os.getenv("API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME")
-SYSTEM_MESSAGE = os.getenv("SYSTEM_MESSAGE")
-SUMMARY_PROMPT = os.getenv("SUMMARY_PROMPT")
+# Initialize QSettings
+settings = QSettings("TLDW", "VideoSummarizer")
+
+# Load defaults from environment or use hardcoded defaults
+LLM_BASE_URL = settings.value("llm_base_url", os.getenv("LLM_BASE_URL", "http://localhost:8080/v1"))
+API_KEY = settings.value("api_key", os.getenv("API_KEY", "doesntmatter"))
+MODEL_NAME = settings.value("model_name", os.getenv("MODEL_NAME", "doesntmatter"))
+SYSTEM_MESSAGE = settings.value("system_message", os.getenv("SYSTEM_MESSAGE", "You summarizes video transcripts"))
+SUMMARY_PROMPT = settings.value("summary_prompt", os.getenv("SUMMARY_PROMPT", "Video Transcript: {transcript}\n\nSummarize the above transcript in markdown format with key topics and interesting quotes"))
 
 def llm(prompt):
     client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL)
@@ -73,11 +78,20 @@ class TranscriptApp(QMainWindow):
         self.url_input.setPlaceholderText("Paste YouTube URL here")
         layout.addWidget(self.url_input)
 
-        # Create button with larger text
+        # Create buttons with larger text
+        button_layout = QVBoxLayout()
+        
         self.fetch_button = QPushButton("Summarize Video")
         self.fetch_button.setFont(default_font)
         self.fetch_button.clicked.connect(self.fetch_transcript)
-        layout.addWidget(self.fetch_button)
+        button_layout.addWidget(self.fetch_button)
+        
+        self.config_button = QPushButton("Configuration")
+        self.config_button.setFont(default_font)
+        self.config_button.clicked.connect(self.show_config_dialog)
+        button_layout.addWidget(self.config_button)
+        
+        layout.addLayout(button_layout)
 
         # Create tab widget for formatted and raw views
         self.tab_widget = QTabWidget()
@@ -149,6 +163,58 @@ class TranscriptApp(QMainWindow):
         self.formatted_display.setText(html_content)
         self.raw_display.setText(video_summary)
         self.llm_thread = None  # Reset the thread
+
+class ConfigDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Configuration")
+        
+        layout = QFormLayout(self)
+        
+        self.llm_base_url = QLineEdit(LLM_BASE_URL)
+        self.api_key = QLineEdit(API_KEY)
+        self.model_name = QLineEdit(MODEL_NAME)
+        self.system_message = QTextEdit(SYSTEM_MESSAGE)
+        self.summary_prompt = QTextEdit(SUMMARY_PROMPT)
+        
+        layout.addRow("LLM Base URL:", self.llm_base_url)
+        layout.addRow("API Key:", self.api_key)
+        layout.addRow("Model Name:", self.model_name)
+        layout.addRow("System Message:", self.system_message)
+        layout.addRow("Summary Prompt:", self.summary_prompt)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        
+        layout.addRow(buttons)
+        
+    def get_values(self):
+        return {
+            "llm_base_url": self.llm_base_url.text(),
+            "api_key": self.api_key.text(),
+            "model_name": self.model_name.text(),
+            "system_message": self.system_message.toPlainText(),
+            "summary_prompt": self.summary_prompt.toPlainText()
+        }
+
+    def show_config_dialog(self):
+        dialog = ConfigDialog(self)
+        if dialog.exec_() == QDialog.Accepted:
+            values = dialog.get_values()
+            settings.setValue("llm_base_url", values["llm_base_url"])
+            settings.setValue("api_key", values["api_key"])
+            settings.setValue("model_name", values["model_name"])
+            settings.setValue("system_message", values["system_message"])
+            settings.setValue("summary_prompt", values["summary_prompt"])
+            
+            # Update global variables
+            global LLM_BASE_URL, API_KEY, MODEL_NAME, SYSTEM_MESSAGE, SUMMARY_PROMPT
+            LLM_BASE_URL = values["llm_base_url"]
+            API_KEY = values["api_key"]
+            MODEL_NAME = values["model_name"]
+            SYSTEM_MESSAGE = values["system_message"]
+            SUMMARY_PROMPT = values["summary_prompt"]
 
     def show_error(self, message):
         """
