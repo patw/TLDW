@@ -152,7 +152,7 @@ class TranscriptApp(QMainWindow):
 
 
         except Exception as e:
-            self.transcript_display.setText(f"Error fetching transcript: {str(e)}")
+            self.formatted_display.setText(f"Error fetching transcript: {str(e)}")
 
     def update_summary(self, video_summary):
         """
@@ -162,6 +162,16 @@ class TranscriptApp(QMainWindow):
         html_content = markdown2.markdown(video_summary)
         self.formatted_display.setText(html_content)
         self.raw_display.setText(video_summary)
+        self.llm_thread = None  # Reset the thread
+
+    def show_error(self, message):
+        """
+        Displays an error message in both tabs.
+        This method is called when the LLM thread encounters an error.
+        """
+        error_msg = f"Error generating summary: {message}"
+        self.formatted_display.setText(error_msg)
+        self.raw_display.setText(error_msg)
         self.llm_thread = None  # Reset the thread
 
     def show_config_dialog(self):
@@ -215,16 +225,6 @@ class ConfigDialog(QDialog):
             "system_message": self.system_message.toPlainText(),
             "summary_prompt": self.summary_prompt.toPlainText()
         }
-
-    def show_error(self, message):
-        """
-        Displays an error message in both tabs.
-        This method is called when the LLM thread encounters an error.
-        """
-        error_msg = f"Error generating summary: {message}"
-        self.formatted_display.setText(error_msg)
-        self.raw_display.setText(error_msg)
-        self.llm_thread = None  # Reset the thread
 
 
 def main():
