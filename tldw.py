@@ -29,7 +29,7 @@ MAX_TOKENS = float(os.getenv("MAX_TOKENS"))
 def llm(prompt):
     client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL)
     messages=[{"role": "system", "content": SYSTEM_MESSAGE},{"role": "user", "content": prompt}]
-    response = client.chat.completions.create(model=MODEL_NAME, max_tokens=MAX_TOKENS, temperature=TEMPERATURE, top_p=TOP_P, messages=messages)
+    response = client.chat.completions.create(model=MODEL_NAME, messages=messages)
     return response.choices[0].message.content
 
 class LLMThread(QThread):
