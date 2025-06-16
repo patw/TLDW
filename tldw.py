@@ -131,7 +131,7 @@ class TranscriptApp(QMainWindow):
         video_id = self.extract_video_id(url)
         
         if not video_id:
-            self.transcript_display.setText("Invalid YouTube URL")
+            self.formatted_display.setText("Invalid YouTube URL")
             return
 
         try:
