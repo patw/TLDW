@@ -22,9 +22,6 @@ API_KEY = os.getenv("API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 SYSTEM_MESSAGE = os.getenv("SYSTEM_MESSAGE")
 SUMMARY_PROMPT = os.getenv("SUMMARY_PROMPT")
-TEMPERATURE = float(os.getenv("TEMPERATURE"))
-TOP_P = float(os.getenv("TOP_P"))
-MAX_TOKENS = float(os.getenv("MAX_TOKENS"))
 
 def llm(prompt):
     client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL)
