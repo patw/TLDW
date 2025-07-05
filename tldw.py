@@ -72,6 +72,10 @@ class TranscriptApp(QMainWindow):
         self.statusBar = self.statusBar()
         self.statusBar.showMessage("Ready to Summarize")
 
+        # Initialize timing variables
+        self.transcript_size = 0
+        self.processing_start_time = None
+
         # Set default font
         default_font = QFont()
         default_font.setPointSize(12)  # Increase base font size
@@ -144,6 +148,8 @@ class TranscriptApp(QMainWindow):
             # Extract just the text from the transcript
             text_only = ' '.join([entry['text'] for entry in transcript])
             transcript_size = len(text_only)
+            self.transcript_size = transcript_size
+            self.processing_start_time = time.time()
             self.statusBar.showMessage(f"Transcript size: {transcript_size} bytes. Processing...")
             self.formatted_display.setText("Thinking...")
             self.raw_display.setText("")
@@ -169,7 +175,9 @@ class TranscriptApp(QMainWindow):
         html_content = markdown2.markdown(video_summary)
         self.formatted_display.setText(html_content)
         self.raw_display.setText(video_summary)
-        self.statusBar.showMessage("Ready to Summarize")
+
+        processing_time = time.time() - self.processing_start_time
+        self.statusBar.showMessage(f"Transcript size: {self.transcript_size} bytes. Processing time: {processing_time:.2f} seconds")
         self.llm_thread = None  # Reset the thread
 
     def show_error(self, message):
@@ -180,7 +188,13 @@ class TranscriptApp(QMainWindow):
         error_msg = f"Error generating summary: {message}"
         self.formatted_display.setText(error_msg)
         self.raw_display.setText(error_msg)
-        self.statusBar.showMessage("Ready to Summarize")
+
+        if self.processing_start_time:
+            processing_time = time.time() - self.processing_start_time
+            self.statusBar.showMessage(f"Transcript size: {self.transcript_size} bytes. Processing time: {processing_time:.2f} seconds")
+        else:
+            self.statusBar.showMessage("Ready to Summarize")
+
         self.llm_thread = None  # Reset the thread
 
     def show_config_dialog(self):
