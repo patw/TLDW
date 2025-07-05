@@ -68,6 +68,10 @@ class TranscriptApp(QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
 
+        # Create status bar
+        self.statusBar = self.statusBar()
+        self.statusBar.showMessage("Ready to Summarize")
+
         # Set default font
         default_font = QFont()
         default_font.setPointSize(12)  # Increase base font size
@@ -123,6 +127,7 @@ class TranscriptApp(QMainWindow):
         return None
 
     def fetch_transcript(self):
+        self.statusBar.showMessage("Fetching transcript...")
         self.formatted_display.setText("Fetching transcript...")
         self.raw_display.setText("")
         self.formatted_display.repaint()
@@ -138,6 +143,8 @@ class TranscriptApp(QMainWindow):
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
             # Extract just the text from the transcript
             text_only = ' '.join([entry['text'] for entry in transcript])
+            transcript_size = len(text_only)
+            self.statusBar.showMessage(f"Transcript size: {transcript_size} bytes. Processing...")
             self.formatted_display.setText("Thinking...")
             self.raw_display.setText("")
             self.formatted_display.repaint()
@@ -162,6 +169,7 @@ class TranscriptApp(QMainWindow):
         html_content = markdown2.markdown(video_summary)
         self.formatted_display.setText(html_content)
         self.raw_display.setText(video_summary)
+        self.statusBar.showMessage("Ready to Summarize")
         self.llm_thread = None  # Reset the thread
 
     def show_error(self, message):
@@ -172,6 +180,7 @@ class TranscriptApp(QMainWindow):
         error_msg = f"Error generating summary: {message}"
         self.formatted_display.setText(error_msg)
         self.raw_display.setText(error_msg)
+        self.statusBar.showMessage("Ready to Summarize")
         self.llm_thread = None  # Reset the thread
 
     def show_config_dialog(self):
