@@ -102,7 +102,7 @@ class TranscriptApp(QMainWindow):
         
         layout.addLayout(button_layout)
 
-        # Create tab widget for formatted and raw views
+        # Create tab widget for formatted, markdown and raw transcript views
         self.tab_widget = QTabWidget()
         
         # Formatted HTML tab
@@ -116,9 +116,15 @@ class TranscriptApp(QMainWindow):
         self.raw_display.setFont(default_font)
         self.raw_display.setReadOnly(True)
         
+        # Raw transcript tab
+        self.raw_transcript_display = QTextEdit()
+        self.raw_transcript_display.setFont(default_font)
+        self.raw_transcript_display.setReadOnly(True)
+        
         # Add tabs
         self.tab_widget.addTab(self.formatted_display, "Formatted")
         self.tab_widget.addTab(self.raw_display, "Raw Markdown")
+        self.tab_widget.addTab(self.raw_transcript_display, "Raw Transcript")
         
         layout.addWidget(self.tab_widget)
 
@@ -147,6 +153,11 @@ class TranscriptApp(QMainWindow):
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
             # Extract just the text from the transcript
+            # Store raw transcript with timestamps
+            raw_transcript = "\n".join([f"{entry['start']:.2f}: {entry['text']}" for entry in transcript])
+            self.raw_transcript_display.setText(raw_transcript)
+            
+            # Create text-only version for summarization
             text_only = ' '.join([entry['text'] for entry in transcript])
             transcript_size = len(text_only)
             self.transcript_size = transcript_size
