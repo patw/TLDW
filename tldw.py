@@ -6,7 +6,8 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal, QSettings
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
-import os 
+import os
+import time
 
 # Convert the markdown output to html for the QT5 textbox
 import markdown2
