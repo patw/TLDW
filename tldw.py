@@ -33,14 +33,21 @@ def llm(prompt):
     client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL, timeout=300)
     messages=[{"role": "system", "content": SYSTEM_MESSAGE},{"role": "user", "content": prompt}]
     response = client.chat.completions.create(model=MODEL_NAME, messages=messages)
-    return response.choices[0].message.content
+    return {
+        "content": response.choices[0].message.content,
+        "usage": {
+            "input_tokens": response.usage.prompt_tokens,
+            "output_tokens": response.usage.completion_tokens,
+            "total_tokens": response.usage.total_tokens
+        }
+    }
 
 class LLMThread(QThread):
     """
     A QThread class to run the LLM inference in a separate thread.
     This prevents the GUI from freezing during long-running tasks.
     """
-    summary_ready = pyqtSignal(str)
+    summary_ready = pyqtSignal(str, dict)  # content, usage
     error = pyqtSignal(str)
 
     def __init__(self, prompt):
@@ -52,8 +59,8 @@ class LLMThread(QThread):
         Runs the LLM inference and emits a signal when the summary is ready.
         """
         try:
-            summary = llm(self.prompt)
-            self.summary_ready.emit(summary)
+            result = llm(self.prompt)
+            self.summary_ready.emit(result["content"], result["usage"])
         except Exception as e:
             self.error.emit(str(e))
 
@@ -179,7 +186,7 @@ class TranscriptApp(QMainWindow):
         except Exception as e:
             self.formatted_display.setText(f"Error fetching transcript: {str(e)}")
 
-    def update_summary(self, video_summary):
+    def update_summary(self, video_summary, usage_stats):
         """
         Updates both tabs with the summary from the LLM.
         This method is called when the LLM thread finishes successfully.
@@ -189,7 +196,14 @@ class TranscriptApp(QMainWindow):
         self.raw_display.setText(video_summary)
 
         processing_time = time.time() - self.processing_start_time
-        self.statusBar.showMessage(f"Transcript size: {self.transcript_size} bytes. Processing time: {processing_time:.2f} seconds")
+        tokens_per_sec = usage_stats["output_tokens"] / processing_time if processing_time > 0 else 0
+        
+        status_message = (
+            f"Transcript: {self.transcript_size} bytes | "
+            f"Tokens: {usage_stats['input_tokens']} in, {usage_stats['output_tokens']} out | "
+            f"Time: {processing_time:.2f}s ({tokens_per_sec:.1f} tokens/s)"
+        )
+        self.statusBar.showMessage(status_message)
         self.llm_thread = None  # Reset the thread
 
     def show_error(self, message):
