@@ -1,6 +1,6 @@
 # TLDW
 
-I don't have time to watch all this Youtube content.  TLDW will accept a youtube URL, download the transcript for the video, and summarize it with an LLM.
+I don't have time to watch all this Youtube content.  TLDW will accept a youtube URL, download the transcript for the video, and summarize it with an LLM (even a local one!).  
 
 ![Main UI](screenshot.png)
 
@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Copy sample.env to .env and point your endpoint URLs to any openai compatible api.  Ideally used with llama.cpp or ollama for local summarization.
+Open the config tab and add in the baseurl, api key and model name for summaries.  You can also configure the system message and the summary prompt.
 
 ## Running
 
