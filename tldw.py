@@ -29,7 +29,7 @@ SYSTEM_MESSAGE = settings.value("system_message", os.getenv("SYSTEM_MESSAGE", "Y
 SUMMARY_PROMPT = settings.value("summary_prompt", os.getenv("SUMMARY_PROMPT", "Video Transcript: {transcript}\n\nSummarize the above transcript in markdown format with key topics and interesting quotes"))
 
 def llm(prompt):
-    client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL)
+    client = OpenAI(api_key=API_KEY, base_url=LLM_BASE_URL, timeout=300)
     messages=[{"role": "system", "content": SYSTEM_MESSAGE},{"role": "user", "content": prompt}]
     response = client.chat.completions.create(model=MODEL_NAME, messages=messages)
     return response.choices[0].message.content
