@@ -21,3 +21,11 @@ Run either tldw.bat or tldw.sh to start app.
 ## Usage
 
 Paste in a youtube url and hit summarize video
+
+## Updating
+
+Youtube seems to regularly break youtube-transcript-api.  You may need to git pull this code once in a while and run:
+
+```
+pip install --upgrade youtube-transcript-api
+```
