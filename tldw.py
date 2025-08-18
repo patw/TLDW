@@ -158,7 +158,8 @@ class TranscriptApp(QMainWindow):
             return
 
         try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US'])
+            ytt_api = YouTubeTranscriptApi()
+            transcript = ytt_api.fetch(video_id, languages=['en', 'en-US']).to_raw_data()
             # Extract just the text from the transcript
             # Store raw transcript with timestamps
             raw_transcript = "\n".join([f"{entry['start']:.2f}: {entry['text']}" for entry in transcript])
