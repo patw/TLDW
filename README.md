@@ -7,6 +7,8 @@ I don't have time to watch all this Youtube content.  TLDW will accept a youtube
 ## Installation
 
 ```
+python -m venv tldw-env
+source tldw-env/bin/activate
 pip install -r requirements.txt
 ```
 
