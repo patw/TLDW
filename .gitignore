@@ -5,6 +5,8 @@ __pycache__/
 
 tldw-env/
 
+CLAUDE.md
+
 # C extensions
 *.so
 
