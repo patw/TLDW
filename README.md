@@ -20,6 +20,29 @@ Open the config tab and add in the baseurl, api key and model name for summaries
 
 Run either tldw.bat or tldw.sh to start app.
 
+## Desktop Integration (Linux)
+
+To add TLDW to your applications menu and desktop:
+
+1. Edit the TLDW.desktop file and update the paths to match your installation directory:
+   ```
+   Exec=/path/to/your/TLDW/tldw.sh
+   Icon=/path/to/your/TLDW/tldwicon.png
+   Path=/path/to/your/TLDW
+   ```
+
+2. Make it executable and install:
+   ```bash
+   chmod +x TLDW.desktop
+   cp TLDW.desktop ~/.local/share/applications/
+   update-desktop-database ~/.local/share/applications/
+   ```
+
+3. Optionally copy to Desktop for a desktop shortcut:
+   ```bash
+   cp TLDW.desktop ~/Desktop/
+   ```
+
 ## Usage
 
 Paste in a youtube url and hit summarize video

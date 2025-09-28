@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QLineEdit, QPushButton, QTextEdit, QTabWidget,
                             QDialog, QFormLayout, QDialogButtonBox)
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal, QSettings
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
@@ -70,6 +70,11 @@ class TranscriptApp(QMainWindow):
         super().__init__()
         self.setWindowTitle("Too Long, Didn't Watch")
         self.setGeometry(100, 100, 800, 600)  # Large window size
+        
+        # Set window icon
+        icon_path = os.path.join(os.path.dirname(__file__), "tldwicon.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # Create central widget and layout
         central_widget = QWidget()

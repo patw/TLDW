@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=/path/to/TLDW/tldw.sh
+Name=TLDW
+Comment=Too Long, Didn't Watch - YouTube Video Summarizer
+Icon=/path/to/TLDW/tldwicon.png
+Path=/path/to/TLDW
+Categories=AudioVideo;Video;
