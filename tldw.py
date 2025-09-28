@@ -285,6 +285,11 @@ class ConfigDialog(QDialog):
 def main():
     app = QApplication(sys.argv)
     
+    # Set application icon for dock/taskbar
+    icon_path = os.path.join(os.path.dirname(__file__), "tldwicon.png")
+    if os.path.exists(icon_path):
+        app.setWindowIcon(QIcon(icon_path))
+    
     # Set application-wide default font size
     default_font = QFont()
     default_font.setPointSize(12)  # Increase base font size
